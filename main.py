@@ -1,11 +1,11 @@
 import tkinter as tk
 from tkinter import ttk
-from tasks2 import Tasks
+from tasks import Tasks
 from datetime import datetime, timedelta
 
 tasks_work = Tasks('base.json')
 tasks_list = tasks_work.get_all()
-print(tasks_list)
+
 
 
 # Add button
@@ -15,12 +15,11 @@ def add_task():
     if task_deadline.isdigit():
         dead_date = datetime.now() + timedelta(days=int(task_deadline))
         str_date = dead_date.strftime('%d-%m-%Y')
-        print(type(str_date))
     else:
         str_date = 'No'
     if task_name:
         todo_list.insert('', tk.END, values=(task_name, str_date))
-        new_task = {'name': task_name, 'deadline': str_date, 'done': False}
+        new_task = {'name': task_name, 'deadline': str_date, 'done': 'no'}
         tasks_list.append(new_task)
         input_box.delete(0, tk.END)
         input_box_dl.delete(0, tk.END)
@@ -37,22 +36,22 @@ def remove_task():
         todo_list.delete(selected_item)
 
 
-
 def mark_unmark():
-
     selected_item = todo_list.focus()
 
     if selected_item:
-    # Назначение тега с нужным цветом текста
+        # Назначение тега с нужным цветом текста
 
         ind = (todo_list.index(selected_item))
-        if tasks_list[ind]['done']:
+        if tasks_list[ind]['done'] == 'yes':
             todo_list.item(selected_item, tags=('',))
-            tasks_list[ind]['done'] = False
+            tasks_list[ind]['done'] = 'no'
         else:
             todo_list.item(selected_item, tags=('green',))
-            tasks_list[ind]['done'] = True
+            tasks_list[ind]['done'] = 'yes'
         tasks_work.save(tasks_list)
+
+
 # Main window
 main_app = tk.Tk()
 main_app.title('ToDo List')
@@ -62,23 +61,22 @@ todo_list.heading('Task', text='Task')
 todo_list.heading('Deadline', text='Deadline')
 todo_list.column("#0", width=0, stretch=tk.NO)
 todo_list.column("#2", width=100, stretch=tk.NO)
-todo_list.grid(row=0, column=0, sticky='nsew',columnspan=3)
+todo_list.grid(row=0, column=0, sticky='nsew', columnspan=3)
 todo_list.tag_configure('green', foreground='lightgreen')
+todo_list.tag_configure('red', foreground='red')
 
 # Input labels
 input_label = ttk.Label(main_app, text='Enter task/subtask name:')
-input_label.grid(row=1, column=0, sticky='nsew',columnspan=2,padx=5, pady=5)
+input_label.grid(row=1, column=0, sticky='nsew', columnspan=2, padx=5, pady=5)
 input_label_dl = ttk.Label(main_app, text='Deadline: ')
-input_label_dl.grid(row=1, column=2, sticky='w',padx=5, pady=5)
+input_label_dl.grid(row=1, column=2, sticky='w', padx=5, pady=5)
 # Input boxs
 input_box = ttk.Entry(main_app)
-input_box.grid(row=2, column=0, sticky='nsew',columnspan=2, padx=5, pady=5)
-input_box_dl = ttk.Entry(main_app,width=7)
-input_box_dl.grid(row=2, column=2, sticky='w',padx=5,pady=5)
+input_box.grid(row=2, column=0, sticky='nsew', columnspan=2, padx=5, pady=5)
+input_box_dl = ttk.Entry(main_app, width=7)
+input_box_dl.grid(row=2, column=2, sticky='w', padx=5, pady=5)
 # Buttons
-style = ttk.Style()
-style.configure('Green.TButton', background='green')
-add_button = ttk.Button(main_app, text='Add', command=add_task, style='Green.TButton')
+add_button = ttk.Button(main_app, text='Add', command=add_task)
 add_button.grid(row=3, column=0, sticky='w', padx=5, pady=5)
 remove_button = ttk.Button(main_app, text='Remove', command=remove_task)
 remove_button.grid(row=3, column=2, sticky='e', padx=5, pady=5)
@@ -89,9 +87,11 @@ main_app.columnconfigure(0, weight=1)
 main_app.rowconfigure(0, weight=1)
 
 for task in tasks_list:
-    print(task)
-    if task['done'] is True:
-        todo_list.insert('', tk.END, values=(task['name'], task['deadline']),tags='green')
+    print(task['done'])
+    if task['done'] == 'yes':
+        todo_list.insert('', tk.END, values=(task['name'], task['deadline']), tags='green')
+    elif task['done'] == 'fail':
+        todo_list.insert('', tk.END, values=(task['name'], task['deadline']), tags='red')
     else:
-        todo_list.insert('', tk.END, values=(task['name'], task['deadline']))
+        todo_list.insert('', tk.END, values=(task['name'], task['deadline']), tags='')
 main_app.mainloop()
