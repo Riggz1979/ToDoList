@@ -9,7 +9,7 @@ class Tasks:
             with open(self.file_name, 'r+') as f:
                 self.all_tasks = json.load(f)
         except Exception:
-            self.all_tasks = dict()
+            self.all_tasks = list()
         return self.all_tasks
 
     def save(self, task_list):
