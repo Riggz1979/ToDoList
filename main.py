@@ -77,7 +77,7 @@ input_box_dl = ttk.Entry(main_app,width=7)
 input_box_dl.grid(row=2, column=2, sticky='w',padx=5,pady=5)
 # Buttons
 style = ttk.Style()
-style.configure('Green.TButton', background='lightgreen', foreground='red')
+style.configure('Green.TButton', background='green')
 add_button = ttk.Button(main_app, text='Add', command=add_task, style='Green.TButton')
 add_button.grid(row=3, column=0, sticky='w', padx=5, pady=5)
 remove_button = ttk.Button(main_app, text='Remove', command=remove_task)
