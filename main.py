@@ -116,8 +116,8 @@ todo_list.heading('Deadline', text='Deadline')
 todo_list.column("#0", width=0, stretch=tk.NO)
 todo_list.column("#2", width=100, stretch=tk.NO)
 todo_list.grid(row=0, column=0, sticky='nsew', columnspan=3)
-todo_list.tag_configure('green', foreground='lightgreen')
-todo_list.tag_configure('red', foreground='red')
+todo_list.tag_configure('green', background='lightgreen')
+todo_list.tag_configure('red', background='pink')
 
 # Input labels
 input_label = ttk.Label(main_app, text='Enter task/subtask name:')
@@ -145,7 +145,7 @@ main_app.columnconfigure(0, weight=1)
 main_app.rowconfigure(0, weight=1)
 
 # Events
-todo_list.bind("<Button-2>", show_context_menu)
+todo_list.bind("<Button-3>", show_context_menu)
 # Set items color
 fill_todo()
 main_app.config(menu=main_app_menu)
