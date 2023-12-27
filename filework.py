@@ -1,23 +1,29 @@
 import json
 from datetime import datetime
-
+logs = False
 
 def log(message):
-    with open('logs', 'a') as f:
-        f.write(f'{datetime.now().strftime('%d-%m-%Y, %H:%M')} : {message}  \n')
+    print(logs)
+    if logs:
+        with open('logs', 'a') as f:
+            f.write(f'{datetime.now().strftime('%d-%m-%Y, %H:%M')} : {message}  \n')
 
 
 def get_settings():
+    global logs
     try:
         with open('settings.json', 'r') as f:
             settings = json.load(f)
     except Exception as e:
         # No, or wrong settings file, go default
-        log(e)
-        settings = {'base': 'base.json'}
+
+        settings = {'base': 'base.json', 'logs': True}
         with open('settings.json', 'w') as f:
             json.dump(settings,f)
+        log(e)
         log('Default settings saved to settings.json')
+    logs=settings['logs']
+    print(logs)
     return settings
 
 

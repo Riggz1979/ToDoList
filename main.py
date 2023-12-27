@@ -1,11 +1,19 @@
 import tkinter as tk
-from tkinter import ttk, filedialog, simpledialog
+from tkinter import ttk, filedialog  # , simpledialog
 from filework import FileWork, get_settings, save_settings
 from datetime import datetime, timedelta
+import platform
 
 settings = get_settings()
 tasks_work = FileWork(settings['base'])
 tasks_list = tasks_work.get_all()
+
+# Cross-platform compatibility
+platform = platform.system()
+if platform == 'Darwin':
+    RMB = '<Button-2>'
+else:
+    RMB = '<Button-3>'
 
 
 # Add button
@@ -30,9 +38,7 @@ def add_task():
 def remove_task():
     if todo_list.selection():
         selected_item = todo_list.selection()
-        print(selected_item)
         ind_to_del = int(todo_list.index(selected_item))
-        print(ind_to_del)
         tasks_list.pop(ind_to_del)
         tasks_work.save(tasks_list)
         todo_list.delete(selected_item)
@@ -47,7 +53,7 @@ def mark_unmark():
             todo_list.item(selected_item, tags=('',))
             tasks_list[ind]['done'] = 'no'
         else:
-            todo_list.item(selected_item, tags=('green',))
+            todo_list.item(selected_item, tags=('good',))
             tasks_list[ind]['done'] = 'yes'
         tasks_work.save(tasks_list)
 
@@ -55,7 +61,6 @@ def mark_unmark():
 def new_base():
     global tasks_list, tasks_work
     new_base_dialog = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("JSON", "*.json")])
-    print(new_base_dialog)
     settings['base'] = new_base_dialog
     save_settings(settings)
     tasks_work = FileWork(settings['base'])
@@ -69,7 +74,7 @@ def open_base():
     open_base_dialog = (tk.filedialog.askopenfilename
                         (parent=main_app, title='Open base:', filetypes=[('json', '*.json')]))
     if 'settings.json' in open_base_dialog:
-        tk.messagebox.showerror('Alert!','settings.json is not a base!')
+        tk.messagebox.showerror('Alert!', 'settings.json is not a base!')
     else:
         settings['base'] = open_base_dialog
         save_settings(settings)
@@ -77,9 +82,9 @@ def open_base():
         tasks_list = tasks_work.get_all()
         fill_todo()
 
+
 def show_context_menu(event):
     item = todo_list.identify_row(event.y)
-    print(item)
     if item:
         todo_list.selection_set(item)
         context_menu.post(event.x_root + 30, event.y_root)
@@ -89,9 +94,9 @@ def fill_todo():
     todo_list.delete(*todo_list.get_children())
     for task in tasks_list:
         if task['done'] == 'yes':
-            todo_list.insert('', tk.END, values=(task['name'], task['deadline']), tags='green')
+            todo_list.insert('', tk.END, values=(task['name'], task['deadline']), tags='good')
         elif task['done'] == 'fail':
-            todo_list.insert('', tk.END, values=(task['name'], task['deadline']), tags='red')
+            todo_list.insert('', tk.END, values=(task['name'], task['deadline']), tags='bad')
         else:
             todo_list.insert('', tk.END, values=(task['name'], task['deadline']), tags='')
 
@@ -116,8 +121,8 @@ todo_list.heading('Deadline', text='Deadline')
 todo_list.column("#0", width=0, stretch=tk.NO)
 todo_list.column("#2", width=100, stretch=tk.NO)
 todo_list.grid(row=0, column=0, sticky='nsew', columnspan=3)
-todo_list.tag_configure('green', background='lightgreen')
-todo_list.tag_configure('red', background='pink')
+todo_list.tag_configure('good', background='lightgreen', foreground='blue')
+todo_list.tag_configure('bad', background='pink', foreground='red')
 
 # Input labels
 input_label = ttk.Label(main_app, text='Enter task/subtask name:')
@@ -138,14 +143,16 @@ mark_button = ttk.Button(main_app, text='Mark', command=mark_unmark)
 mark_button.grid(row=3, column=1, sticky='', padx=5, pady=5)
 # Right-click menu
 context_menu = tk.Menu(main_app, tearoff=0)
-context_menu.add_command(label='Edit', command=mark_unmark)
+context_menu.add_command(label='Edit name', command=mark_unmark)
+context_menu.add_command(label='Edit deadline', command=mark_unmark)
+
 context_menu.add_command(label='Remove', command=remove_task)
 
 main_app.columnconfigure(0, weight=1)
 main_app.rowconfigure(0, weight=1)
 
 # Events
-todo_list.bind("<Button-3>", show_context_menu)
+todo_list.bind(RMB, show_context_menu)
 # Set items color
 fill_todo()
 main_app.config(menu=main_app_menu)
