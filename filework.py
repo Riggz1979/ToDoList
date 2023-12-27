@@ -4,6 +4,7 @@ from datetime import datetime
 logs = False
 
 
+# Logging
 def log(message):
     print(logs)
     if logs:
@@ -11,6 +12,7 @@ def log(message):
             f.write(f'{datetime.now().strftime('%d-%m-%Y, %H:%M')} : {message}  \n')
 
 
+# Settings block
 def get_settings():
     global logs
     try:

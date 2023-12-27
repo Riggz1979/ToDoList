@@ -34,11 +34,24 @@ def add_task():
         str_date = 'No'
     if task_name:
         todo_list.insert('', tk.END, values=(task_name, str_date))
-        new_task = {'name': task_name, 'deadline': str_date, 'done': 'no'}
+        new_task = {'name': task_name, 'deadline': str_date, 'done': 'no','subtasks': []}
         tasks_list.append(new_task)
         input_box.delete(0, tk.END)
         input_box_dl.delete(0, tk.END)
         tasks_work.save(tasks_list)
+
+def add_subtask():
+    selected_item = todo_list.selection()
+    ind = get_index()
+    if selected_item and todo_list.parent(selected_item) == '':
+        subtask = simpledialog.askstring('','')
+        if subtask:
+            print(subtask)
+            todo_list.insert(selected_item, tk.END, values=(subtask))
+            subtask_to_add = {'name': subtask, 'done': 'no'}
+            tasks_list[ind]['subtasks'].append(subtask_to_add)
+            print(tasks_list[ind]['subtasks'])
+            tasks_work.save(tasks_list)
 
 
 # Remove button
@@ -65,7 +78,7 @@ def mark_unmark():
         tasks_work.save(tasks_list)
 
 
-# New base creation
+# New base creation func
 def new_base():
     global tasks_list, tasks_work
     new_base_dialog = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("JSON", "*.json")])
@@ -77,6 +90,7 @@ def new_base():
     fill_todo()
 
 
+# Open base menu func
 def open_base():
     global tasks_list, tasks_work
     open_base_dialog = (tk.filedialog.askopenfilename
@@ -95,6 +109,10 @@ def show_context_menu(event):
     item = todo_list.identify_row(event.y)
     if item:
         todo_list.selection_set(item)
+        if todo_list.parent(todo_list.selection()) != '':
+            context_menu.entryconfig('Add subtask', state='disabled')
+        else:
+            context_menu.entryconfig('Add subtask', state='normal')
         context_menu.post(event.x_root + 30, event.y_root)
 
 
@@ -143,17 +161,17 @@ main_app.minsize(width=400, height=400)
 main_app_menu = tk.Menu(main_app)
 # File
 file_menu = tk.Menu(main_app_menu, tearoff=0)
-file_menu.add_command(label='New Base', command=new_base)
+file_menu.add_command(label='New base', command=new_base)
 file_menu.add_command(label="Open base", command=open_base)
 file_menu.add_separator()
 file_menu.add_command(label="Exit", command=main_app.destroy)
 main_app_menu.add_cascade(label='File', menu=file_menu)
 
 # List window
-todo_list = ttk.Treeview(main_app, columns=('Task', 'Deadline'), show='headings')
+todo_list = ttk.Treeview(main_app, columns=('Task', 'Deadline'))
 todo_list.heading('Task', text='Task')
 todo_list.heading('Deadline', text='Deadline')
-todo_list.column("#0", width=0, stretch=tk.NO)
+todo_list.column("#0", width=30, stretch=tk.NO)
 todo_list.column("#2", width=100, stretch=tk.NO)
 todo_list.grid(row=0, column=0, sticky='nsew', columnspan=3)
 todo_list.tag_configure('good', background='lightgreen', foreground='blue')
@@ -180,7 +198,7 @@ mark_button.grid(row=3, column=1, sticky='', padx=5, pady=5)
 context_menu = tk.Menu(main_app, tearoff=0)
 context_menu.add_command(label='Edit name', command=edit_name)
 context_menu.add_command(label='Edit deadline', command=edit_deadline)
-
+context_menu.add_command(label='Add subtask', command=add_subtask)
 context_menu.add_command(label='Remove', command=remove_task)
 
 main_app.columnconfigure(0, weight=1)
