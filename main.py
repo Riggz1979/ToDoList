@@ -16,6 +16,13 @@ else:
     RMB = '<Button-3>'
 
 
+def get_index():
+    if todo_list.selection():
+        selected_item = todo_list.selection()
+        return todo_list.index(selected_item)
+    return None
+
+
 # Add button
 def add_task():
     task_name = input_box.get()
@@ -38,7 +45,7 @@ def add_task():
 def remove_task():
     if todo_list.selection():
         selected_item = todo_list.selection()
-        ind_to_del = int(todo_list.index(selected_item))
+        ind_to_del = get_index()
         tasks_list.pop(ind_to_del)
         tasks_work.save(tasks_list)
         todo_list.delete(selected_item)
@@ -58,6 +65,7 @@ def mark_unmark():
         tasks_work.save(tasks_list)
 
 
+# New base creation
 def new_base():
     global tasks_list, tasks_work
     new_base_dialog = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("JSON", "*.json")])
@@ -89,15 +97,33 @@ def show_context_menu(event):
         todo_list.selection_set(item)
         context_menu.post(event.x_root + 30, event.y_root)
 
+
+# Edit task name
 def edit_name():
-    if todo_list.selection():
-        selected_item = todo_list.selection()
-        index = todo_list.index(selected_item)
-        new_name = tk.simpledialog.askstring(title='',prompt='Enter new name:')
-        if new_name:
-            tasks_list[index]['name'] = new_name
-            tasks_work.save(tasks_list)
-            fill_todo()
+    index = get_index()
+    new_name = tk.simpledialog.askstring(title='', prompt='Enter new name:')
+    if new_name:
+        tasks_list[index]['name'] = new_name
+        tasks_work.save(tasks_list)
+        fill_todo()
+
+
+# Edit deadline
+def edit_deadline():
+    index = get_index()
+    new_deadline = tk.simpledialog.askstring(title='', prompt='Enter days to deadline:')
+    if new_deadline.isdigit():
+        dead_date = datetime.now() + timedelta(days=int(new_deadline))
+        str_date = dead_date.strftime('%d-%m-%Y')
+    else:
+        str_date = 'No'
+    tasks_list[index]['deadline'] = str_date
+    if tasks_list[index]['done'] == 'fail':
+        tasks_list[index]['done'] = 'no'
+    tasks_work.save(tasks_list)
+    fill_todo()
+
+
 def fill_todo():
     todo_list.delete(*todo_list.get_children())
     for task in tasks_list:
@@ -112,6 +138,7 @@ def fill_todo():
 # Main window
 main_app = tk.Tk()
 main_app.title('ToDo List')
+main_app.minsize(width=400, height=400)
 # Menu
 main_app_menu = tk.Menu(main_app)
 # File
@@ -152,7 +179,7 @@ mark_button.grid(row=3, column=1, sticky='', padx=5, pady=5)
 # Right-click menu
 context_menu = tk.Menu(main_app, tearoff=0)
 context_menu.add_command(label='Edit name', command=edit_name)
-context_menu.add_command(label='Edit deadline', command=mark_unmark)
+context_menu.add_command(label='Edit deadline', command=edit_deadline)
 
 context_menu.add_command(label='Remove', command=remove_task)
 

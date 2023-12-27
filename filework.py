@@ -1,6 +1,8 @@
 import json
 from datetime import datetime
+
 logs = False
+
 
 def log(message):
     print(logs)
@@ -19,17 +21,17 @@ def get_settings():
 
         settings = {'base': 'base.json', 'logs': True}
         with open('settings.json', 'w') as f:
-            json.dump(settings,f)
+            json.dump(settings, f)
         log(e)
         log('Default settings saved to settings.json')
-    logs=settings['logs']
+    logs = settings['logs']
     print(logs)
     return settings
 
 
 def save_settings(settings):
     with open('settings.json', 'w') as f:
-        json.dump(settings,f)
+        json.dump(settings, f)
         log('Settings saved to settings.json')
 
 
@@ -58,8 +60,6 @@ class FileWork:
         with open(self.file_name, 'w') as f:
             json.dump(task_list, f)
 
-
     def clear_base(self):
-        with open(self.file_name, 'w') as f:
+        with open(self.file_name, 'w'):
             log(f'{self.file_name} cleared!')
-
