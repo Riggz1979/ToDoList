@@ -14,6 +14,7 @@ class Tasks:
         except Exception:
             self.all_tasks = list()
         for task in self.all_tasks:
+            # Checking deadline status and mark outdated as 'fail'
             if task['deadline'] != 'No':
                 date_obj = datetime.strptime(task['deadline'], "%d-%m-%Y")
                 if date_obj < datetime.now() and task['done'] != 'yes':

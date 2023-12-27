@@ -37,11 +37,8 @@ def remove_task():
 
 
 def mark_unmark():
-    selected_item = todo_list.focus()
-
+    selected_item = todo_list.selection()
     if selected_item:
-        # Назначение тега с нужным цветом текста
-
         ind = (todo_list.index(selected_item))
         if tasks_list[ind]['done'] == 'yes':
             todo_list.item(selected_item, tags=('',))
@@ -51,6 +48,13 @@ def mark_unmark():
             tasks_list[ind]['done'] = 'yes'
         tasks_work.save(tasks_list)
 
+
+def show_context_menu(event):
+    item = todo_list.identify_row(event.y)
+    print(item)
+    if item:
+        todo_list.selection_set(item)
+        context_menu.post(event.x_root+30, event.y_root)
 
 # Main window
 main_app = tk.Tk()
@@ -82,9 +86,15 @@ remove_button = ttk.Button(main_app, text='Remove', command=remove_task)
 remove_button.grid(row=3, column=2, sticky='e', padx=5, pady=5)
 mark_button = ttk.Button(main_app, text='Mark', command=mark_unmark)
 mark_button.grid(row=3, column=1, sticky='', padx=5, pady=5)
+# Right-click menu
+context_menu = tk.Menu(main_app, tearoff=0)
+context_menu.add_command(label='Edit', command=mark_unmark)
+context_menu.add_command(label='Remove', command=remove_task)
 
 main_app.columnconfigure(0, weight=1)
 main_app.rowconfigure(0, weight=1)
+# Events
+todo_list.bind("<Button-2>", show_context_menu)
 
 for task in tasks_list:
     print(task['done'])
