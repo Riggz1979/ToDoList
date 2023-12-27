@@ -1,11 +1,11 @@
 import tkinter as tk
-from tkinter import ttk
-from tasks import Tasks
+from tkinter import ttk, filedialog, simpledialog
+from filework import FileWork, get_settings, save_settings
 from datetime import datetime, timedelta
 
-tasks_work = Tasks('base.json')
+settings = get_settings()
+tasks_work = FileWork(settings['base'])
 tasks_list = tasks_work.get_all()
-
 
 
 # Add button
@@ -30,12 +30,15 @@ def add_task():
 def remove_task():
     if todo_list.selection():
         selected_item = todo_list.selection()
+        print(selected_item)
         ind_to_del = int(todo_list.index(selected_item))
+        print(ind_to_del)
         tasks_list.pop(ind_to_del)
         tasks_work.save(tasks_list)
         todo_list.delete(selected_item)
 
 
+# Mark button
 def mark_unmark():
     selected_item = todo_list.selection()
     if selected_item:
@@ -49,16 +52,63 @@ def mark_unmark():
         tasks_work.save(tasks_list)
 
 
+def new_base():
+    global tasks_list, tasks_work
+    new_base_dialog = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("JSON", "*.json")])
+    print(new_base_dialog)
+    settings['base'] = new_base_dialog
+    save_settings(settings)
+    tasks_work = FileWork(settings['base'])
+    tasks_work.clear_base()
+    tasks_list = tasks_work.get_all()
+    fill_todo()
+
+
+def open_base():
+    global tasks_list, tasks_work
+    open_base_dialog = (tk.filedialog.askopenfilename
+                        (parent=main_app, title='Open base:', filetypes=[('json', '*.json')]))
+    if 'settings.json' in open_base_dialog:
+        tk.messagebox.showerror('Alert!','settings.json is not a base!')
+    else:
+        settings['base'] = open_base_dialog
+        save_settings(settings)
+        tasks_work = FileWork(settings['base'])
+        tasks_list = tasks_work.get_all()
+        fill_todo()
+
 def show_context_menu(event):
     item = todo_list.identify_row(event.y)
     print(item)
     if item:
         todo_list.selection_set(item)
-        context_menu.post(event.x_root+30, event.y_root)
+        context_menu.post(event.x_root + 30, event.y_root)
+
+
+def fill_todo():
+    todo_list.delete(*todo_list.get_children())
+    for task in tasks_list:
+        if task['done'] == 'yes':
+            todo_list.insert('', tk.END, values=(task['name'], task['deadline']), tags='green')
+        elif task['done'] == 'fail':
+            todo_list.insert('', tk.END, values=(task['name'], task['deadline']), tags='red')
+        else:
+            todo_list.insert('', tk.END, values=(task['name'], task['deadline']), tags='')
+
 
 # Main window
 main_app = tk.Tk()
 main_app.title('ToDo List')
+# Menu
+main_app_menu = tk.Menu(main_app)
+# File
+file_menu = tk.Menu(main_app_menu, tearoff=0)
+file_menu.add_command(label='New Base', command=new_base)
+file_menu.add_command(label="Open base", command=open_base)
+file_menu.add_separator()
+file_menu.add_command(label="Exit", command=main_app.destroy)
+main_app_menu.add_cascade(label='File', menu=file_menu)
+
 # List window
 todo_list = ttk.Treeview(main_app, columns=('Task', 'Deadline'), show='headings')
 todo_list.heading('Task', text='Task')
@@ -93,15 +143,10 @@ context_menu.add_command(label='Remove', command=remove_task)
 
 main_app.columnconfigure(0, weight=1)
 main_app.rowconfigure(0, weight=1)
+
 # Events
 todo_list.bind("<Button-2>", show_context_menu)
-
-for task in tasks_list:
-    print(task['done'])
-    if task['done'] == 'yes':
-        todo_list.insert('', tk.END, values=(task['name'], task['deadline']), tags='green')
-    elif task['done'] == 'fail':
-        todo_list.insert('', tk.END, values=(task['name'], task['deadline']), tags='red')
-    else:
-        todo_list.insert('', tk.END, values=(task['name'], task['deadline']), tags='')
+# Set items color
+fill_todo()
+main_app.config(menu=main_app_menu)
 main_app.mainloop()
