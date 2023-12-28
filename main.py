@@ -57,13 +57,26 @@ def add_subtask():
 
 # Remove button
 def remove_task():
-    if todo_list.selection():
-        selected_item = todo_list.selection()
+    selected_item = todo_list.selection()
+    if todo_list.selection() and todo_list.parent(todo_list.selection()) == '':
+
         ind_to_del = get_index()
         tasks_list.pop(ind_to_del)
         tasks_work.save(tasks_list)
         todo_list.delete(selected_item)
+    elif selected_item and todo_list.parent(selected_item) != '':
+        selected_item = todo_list.selection()
+        ind = (todo_list.index(todo_list.parent(selected_item)))
+        selected_sub_name = (todo_list.item(selected_item)['values'][0])
+        i = 0
+        for subtask in tasks_list[ind]['subtasks']:
 
+            if subtask['name'] == selected_sub_name:
+                tasks_list[ind]['subtasks'].pop(i)
+                break
+            i+=1
+        tasks_work.save(tasks_list)
+        fill_todo()
 
 # Mark button
 def mark_unmark():
