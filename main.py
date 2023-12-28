@@ -34,17 +34,18 @@ def add_task():
         str_date = 'No'
     if task_name:
         todo_list.insert('', tk.END, values=(task_name, str_date))
-        new_task = {'name': task_name, 'deadline': str_date, 'done': 'no','subtasks': []}
+        new_task = {'name': task_name, 'deadline': str_date, 'done': 'no', 'subtasks': []}
         tasks_list.append(new_task)
         input_box.delete(0, tk.END)
         input_box_dl.delete(0, tk.END)
         tasks_work.save(tasks_list)
 
+
 def add_subtask():
     selected_item = todo_list.selection()
     ind = get_index()
     if selected_item and todo_list.parent(selected_item) == '':
-        subtask = simpledialog.askstring('','')
+        subtask = simpledialog.askstring('', '')
         if subtask:
             print(subtask)
             todo_list.insert(selected_item, tk.END, values=(subtask))
@@ -68,13 +69,24 @@ def remove_task():
 def mark_unmark():
     selected_item = todo_list.selection()
     if selected_item:
-        ind = (todo_list.index(selected_item))
-        if tasks_list[ind]['done'] == 'yes':
-            todo_list.item(selected_item, tags=('',))
-            tasks_list[ind]['done'] = 'no'
+
+        if todo_list.parent(selected_item) == '':
+            ind = (todo_list.index(selected_item))
+            print(selected_item)
+            if tasks_list[ind]['done'] == 'yes':
+                todo_list.item(selected_item, tags=('',))
+                tasks_list[ind]['done'] = 'no'
+            else:
+                todo_list.item(selected_item, tags=('good',))
+                tasks_list[ind]['done'] = 'yes'
         else:
-            todo_list.item(selected_item, tags=('good',))
-            tasks_list[ind]['done'] = 'yes'
+            ind = (todo_list.index(todo_list.parent(selected_item)))
+            selected_sub_name = (todo_list.item(selected_item)['values'][0])
+            for subtask in tasks_list[ind]['subtasks']:
+                print(subtask)
+                if subtask['name'] == selected_sub_name:
+                    subtask['done'] = 'yes'
+                    todo_list.item(selected_item, tags=('good',))
         tasks_work.save(tasks_list)
 
 
@@ -146,11 +158,16 @@ def fill_todo():
     todo_list.delete(*todo_list.get_children())
     for task in tasks_list:
         if task['done'] == 'yes':
-            todo_list.insert('', tk.END, values=(task['name'], task['deadline']), tags='good')
+            added_task = todo_list.insert('', tk.END, values=(task['name'], task['deadline']), tags='good')
         elif task['done'] == 'fail':
-            todo_list.insert('', tk.END, values=(task['name'], task['deadline']), tags='bad')
+            added_task = todo_list.insert('', tk.END, values=(task['name'], task['deadline']), tags='bad')
         else:
-            todo_list.insert('', tk.END, values=(task['name'], task['deadline']), tags='')
+            added_task = todo_list.insert('', tk.END, values=(task['name'], task['deadline']), tags='')
+
+        if task['subtasks'] != '':
+            for subtask in task['subtasks']:
+                added_sub = todo_list.insert(added_task, tk.END, values=(subtask['name']))
+                print(added_sub)
 
 
 # Main window
