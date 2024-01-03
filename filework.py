@@ -6,7 +6,6 @@ logs = False
 
 # Logging
 def log(message):
-    print(logs)
     if logs:
         with open('logs', 'a') as f:
             f.write(f'{datetime.now().strftime('%d-%m-%Y, %H:%M')} : {message}  \n')
@@ -27,7 +26,6 @@ def get_settings():
         log(e)
         log('Default settings saved to settings.json')
     logs = settings['logs']
-    print(logs)
     return settings
 
 

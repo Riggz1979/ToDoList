@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import platform
 
 settings = get_settings()
+
 tasks_work = FileWork(settings['base'])
 tasks_list = tasks_work.get_all()
 
@@ -150,7 +151,6 @@ def edit_name():
     if new_name:
         if todo_list.parent(todo_list.selection()) == '':
             tasks_list[index]['name'] = new_name
-
         else:
             ind = (todo_list.index(todo_list.parent(todo_list.selection())))
             name_to_edit = todo_list.item(todo_list.selection())['values'][0]
@@ -178,6 +178,10 @@ def edit_deadline():
 
 
 def fill_todo():
+    """
+    Refresh todo_list treeview from tasks_list
+    Mark tasks visually done/not done/outdated
+    """
     subs_completed = True
     todo_list.delete(*todo_list.get_children())
     for task in tasks_list:
@@ -204,10 +208,18 @@ def fill_todo():
                 fill_todo()
 
 
+def logs_switch():
+    print(log_var.get())
+    settings['logs'] = log_var.get()
+    save_settings(settings)
+
+
 # Main window
 main_app = tk.Tk()
 main_app.title('ToDo List')
 main_app.minsize(width=400, height=400)
+log_var = tk.BooleanVar()
+log_var.set(settings['logs'])
 # Menu
 main_app_menu = tk.Menu(main_app)
 # File
@@ -217,7 +229,10 @@ file_menu.add_command(label="Open base", command=open_base)
 file_menu.add_separator()
 file_menu.add_command(label="Exit", command=main_app.destroy)
 main_app_menu.add_cascade(label='File', menu=file_menu)
-
+# Settings
+set_menu = tk.Menu(main_app_menu, tearoff=0)
+set_menu.add_checkbutton(label='Logging', variable=log_var, command=logs_switch)
+main_app_menu.add_cascade(label='Settings', menu=set_menu)
 # List window
 todo_list = ttk.Treeview(main_app, columns=('Task', 'Deadline'))
 todo_list.heading('Task', text='Task')
@@ -229,7 +244,7 @@ todo_list.tag_configure('good', background='lightgreen', foreground='blue')
 todo_list.tag_configure('bad', background='pink', foreground='red')
 
 # Input labels
-input_label = ttk.Label(main_app, text='Enter task/subtask name:')
+input_label = ttk.Label(main_app, text='Enter task name:')
 input_label.grid(row=1, column=0, sticky='nsew', columnspan=2, padx=5, pady=5)
 input_label_dl = ttk.Label(main_app, text='Deadline: ')
 input_label_dl.grid(row=1, column=2, sticky='w', padx=5, pady=5)
