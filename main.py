@@ -47,11 +47,9 @@ def add_subtask():
     if selected_item and todo_list.parent(selected_item) == '':
         subtask = simpledialog.askstring('', '')
         if subtask:
-            print(subtask)
             todo_list.insert(selected_item, tk.END, values=subtask)
             subtask_to_add = {'name': subtask, 'done': 'no'}
             tasks_list[ind]['subtasks'].append(subtask_to_add)
-            print(tasks_list[ind]['subtasks'])
             tasks_work.save(tasks_list)
 
 
@@ -84,7 +82,6 @@ def mark_unmark():
         # Task or subtask?
         if todo_list.parent(selected_item) == '':
             ind = (todo_list.index(selected_item))
-            print(selected_item)
             if tasks_list[ind]['done'] == 'yes':
                 todo_list.item(selected_item, tags=('',))
                 tasks_list[ind]['done'] = 'no'
@@ -93,9 +90,8 @@ def mark_unmark():
                 tasks_list[ind]['done'] = 'yes'
         else:
             ind = (todo_list.index(todo_list.parent(selected_item)))
-            selected_sub_name = (todo_list.item(selected_item)['values'][0])
+            selected_sub_name = str((todo_list.item(selected_item)['values'][0]))
             for subtask in tasks_list[ind]['subtasks']:
-                print(subtask)
                 if subtask['name'] == selected_sub_name:
                     if subtask['done'] == 'no':
                         subtask['done'] = 'yes'
@@ -182,7 +178,7 @@ def edit_deadline():
 
 
 def fill_todo():
-    main_completed = True
+    subs_completed = True
     todo_list.delete(*todo_list.get_children())
     for task in tasks_list:
         if task['done'] == 'yes':
@@ -193,22 +189,19 @@ def fill_todo():
             added_task = todo_list.insert('', tk.END, values=(task['name'], task['deadline']), tags='')
         # Checking if task have a subtasks
         if task['subtasks']:
-            print(task['subtasks'])
             for subtask in task['subtasks']:
                 if subtask['done'] == 'yes':
                     todo_list.insert(added_task, tk.END, values=(subtask['name']), tags='good')
                 else:
                     todo_list.insert(added_task, tk.END, values=(subtask['name']), tags='')
-                    main_completed = False
-            print(f'{main_completed} is completed')
-            if main_completed and task['done'] != 'yes':
+                    subs_completed = False
+            # Mark main task completed or uncompleted according to subtasks
+            if subs_completed and task['done'] == 'no':
                 task['done'] = 'yes'
-                print(f'{task} is completed')
                 fill_todo()
-            if not main_completed and task['done'] != 'no':
+            if not subs_completed and task['done'] == 'yes':
                 task['done'] = 'no'
                 fill_todo()
-
 
 
 # Main window
@@ -254,6 +247,7 @@ mark_button = ttk.Button(main_app, text='Mark', command=mark_unmark)
 mark_button.grid(row=3, column=1, sticky='', padx=5, pady=5)
 # Right-click menu
 context_menu = tk.Menu(main_app, tearoff=0)
+context_menu.add_command(label='Mark', command=mark_unmark)
 context_menu.add_command(label='Edit name', command=edit_name)
 context_menu.add_command(label='Edit deadline', command=edit_deadline)
 context_menu.add_command(label='Add subtask', command=add_subtask)
