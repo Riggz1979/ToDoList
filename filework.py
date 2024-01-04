@@ -6,6 +6,7 @@ logs = False
 
 # Logging
 def log(message):
+
     if logs:
         with open('logs', 'a') as f:
             f.write(f'{datetime.now().strftime('%d-%m-%Y, %H:%M')} : {message}  \n')
