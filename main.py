@@ -376,6 +376,10 @@ def logs_switch():
 
 
 def get_help():
+    """
+    Returns the help
+    :return: None
+    """
     help_text = ("Enter task name and deadline and press \"Add\" to add a new task.\n\n"
                  "Deadline should be in days.\n"
                  "Task can be entered without deadline.\n"
