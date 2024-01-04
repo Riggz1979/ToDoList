@@ -18,6 +18,15 @@ else:
 
 
 def get_index():
+    """
+    Retrieves the index of the selected item in the 'todo_list'.
+
+    Checks if there is a selected item in the 'todo_list'. If yes, retrieves the selected item
+    and returns its index using 'todo_list.index'. If no item is selected, returns None.
+
+    Returns:
+        int or None: Index of the selected item or None if no item is selected.
+    """
     if todo_list.selection():
         selected_item = todo_list.selection()
         return todo_list.index(selected_item)
@@ -125,6 +134,21 @@ def remove_task():
 
 # Mark button
 def mark_unmark():
+    """
+        Marks or unmarks the selected task or subtask in the 'todo_list'.
+
+        The function checks if there is a selected item in the 'todo_list'. If yes,
+        it determines whether the selected item is a task or a subtask.
+        - If it's a task, the function toggles the 'done' status between 'yes' and 'no'
+          and updates the visual tags in the 'todo_list'.
+        - If it's a subtask, it finds the corresponding task and toggles the 'done' status
+          of the subtask, updating the visual tags in the 'todo_list'.
+        Finally, it updates the entire 'todo_list' using 'fill_todo' and saves the changes
+        to the tasks file using 'tasks_work.save'.
+
+        Returns:
+            None
+        """
     selected_item = todo_list.selection()
     if selected_item:
         # Task or subtask?
@@ -153,6 +177,17 @@ def mark_unmark():
 
 # New base creation func
 def new_base():
+    """
+        Creates a new tasks base by allowing the user to choose a file.
+
+        The function opens a file dialog to prompt the user to choose a location and name for the new tasks base. It
+        updates the 'settings' with the new base file name, saves the settings, and initializes a new 'FileWork'
+        object with the chosen base file. The existing base file is cleared, and the 'tasks_list' is updated with the
+        tasks from the new base. Finally, it updates the 'todo_list' using 'fill_todo'.
+
+        Returns:
+            None
+        """
     global tasks_list, tasks_work
     new_base_dialog = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("JSON", "*.json")])
     settings['base'] = new_base_dialog
@@ -165,6 +200,17 @@ def new_base():
 
 # Open base menu func
 def open_base():
+    """
+        Opens an existing tasks base by allowing the user to choose a file.
+
+        The function opens a file dialog to prompt the user to choose an existing tasks base file. If the chosen file
+        is 'settings.json', it shows an error message. Otherwise, it updates the 'settings' with the chosen base file
+        name, saves the settings, initializes a new 'FileWork' object with the chosen base file, retrieves tasks from
+        the base, and updates the 'todo_list'.
+
+        Returns:
+            None
+        """
     global tasks_list, tasks_work
     open_base_dialog = (tk.filedialog.askopenfilename
                         (parent=main_app, title='Open base:', filetypes=[('json', '*.json')]))
@@ -179,6 +225,21 @@ def open_base():
 
 
 def show_context_menu(event):
+    """
+        Displays a context menu at the specified event coordinates in the 'todo_list'.
+
+        The function identifies the row in the 'todo_list' where the right-click event occurred.
+        If a row is identified, it sets the selection to that row and configures the context menu
+        entries based on whether the selected item is a task or a subtask. If it's a task,
+        'Add subtask' and 'Edit deadline' options are enabled; if it's a subtask, these options are disabled.
+        Finally, it displays the context menu at the event coordinates.
+
+        Args:
+            event (Event): The right-click event triggering the context menu.
+
+        Returns:
+            None
+        """
     item = todo_list.identify_row(event.y)
     if item:
         todo_list.selection_set(item)
@@ -194,10 +255,16 @@ def show_context_menu(event):
 # Edit task name
 def edit_name():
     """
-    Edit the name of task or subtask
-    Name
-    :return:
-    """
+        Edits the name of the selected task or subtask.
+
+        The function retrieves the index of the selected item using 'get_index'. It then prompts the user to enter a
+        new name using a dialog box. If a valid new name is provided, the function updates the name of the selected
+        task or subtask in the 'tasks_list'. The changes are saved to the tasks file using 'tasks_work.save' and the
+        'todo_list' is updated using 'fill_todo'.
+
+        Returns:
+            None
+        """
     index = get_index()
     new_name = tk.simpledialog.askstring(title='', prompt='Enter new name:')
     if new_name:
@@ -296,9 +363,14 @@ def fill_todo():
 
 def logs_switch():
     """
-    Switch logs on/off
-    Get var from settings menu
-    """
+        Toggles the logging setting based on the value of the log_var variable.
+
+        The function updates the 'logs' setting in the global settings dictionary based on the value of log_var.
+        It then saves the updated settings using the save_settings function.
+
+        Returns:
+            None
+        """
     settings['logs'] = log_var.get()
     save_settings(settings)
 
