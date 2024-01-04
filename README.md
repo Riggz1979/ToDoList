@@ -24,3 +24,6 @@ Currently implemented:
 
 • Logging, can be enabled in the settings
 
+To start: clone of download main.py and filework.py and run main.py
+Default settings file will be created automatically 
+ 
